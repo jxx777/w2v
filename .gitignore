@@ -1,0 +1,41 @@
+# Bytecode
+__pycache__/
+*.py[cod]
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Gensim model files (large binaries + numpy arrays)
+*.model
+*.model.*
+*.npy
+*.bin
+*.vec
+
+# Training output directories
+models/
+checkpoints/
+
+# Datasets — large, external sources
+datasets/
+
+# VSCode / PyCharm project files
+.vscode/
+.idea/
+*.iml
+
+# Logs, caches
+*.log
+.cache/
+logs/
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# System files
+.DS_Store
+Thumbs.db
+

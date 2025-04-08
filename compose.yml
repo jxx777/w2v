@@ -1,0 +1,41 @@
+services:
+  word2vec-trainer:
+    build: .
+    container_name: word2vec_trainer
+    volumes:
+      - ./datasets:/app/datasets
+      - ./models:/app/models
+    environment:
+      # Dataset config
+      WIKI_URL: https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2
+      WIKI_PATH: datasets/enwiki-latest-pages-articles.xml.bz2
+
+      # Model save config
+      MODEL_DIR: models
+      MODEL_NAME: word2vec_en
+
+      # Model hyperparameters
+      VECTOR_SIZE: 300
+      WINDOW: 5
+      MIN_COUNT: 3
+      EPOCHS: 10
+
+      # Qdrant upload control
+      UPLOAD_TO_QDRANT: true
+      QDRANT_HOST: qdrant  # You can change to "127.0.0.1" if not using as service
+      QDRANT_PORT: 6333
+      QDRANT_COLLECTION: word2vec_en
+
+    depends_on:
+      - qdrant
+
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  qdrant_data:

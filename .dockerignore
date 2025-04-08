@@ -1,0 +1,12 @@
+# Ignore Python bytecode and cache directories
+**/__pycache__
+**/*.pyc
+
+# Ignore IDE-specific configuration files
+*.iml
+
+noteboooks/
+
+datasets/
+
+models/
