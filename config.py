@@ -5,8 +5,8 @@ from pathlib import Path
 
 class Settings(BaseSettings):
     # Wikipedia dump
-    WIKI_URL: str
-    WIKI_PATH: Path
+    DATASET_URL: str
+    DATASET_PATH: Path
 
     # Model configuration
     MODEL_OVERRIDE: bool = False

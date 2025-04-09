@@ -1,6 +1,6 @@
 import logging
-from pathlib import Path
 import os
+from pathlib import Path
 
 from gensim.corpora import WikiCorpus
 from gensim.models import Word2Vec
@@ -8,7 +8,6 @@ from tqdm import tqdm
 
 from config import Settings
 from scripts.evaluate import run_full_evaluation, themes
-from scripts.train import train_word2vec_model
 from scripts.upload_qdrant import upload_word2vec_to_qdrant
 from utils.download import download
 
@@ -24,7 +23,7 @@ if __name__ == "__main__":
     logger.info("Current configuration settings:\n%s", settings.model_dump_json(indent=2))
     # Ensure that necessary directories exist
     settings.MODEL_DIR.mkdir(parents=True, exist_ok=True)
-    Path(settings.WIKI_PATH).parent.mkdir(parents=True, exist_ok=True)
+    Path(settings.DATASET_PATH).parent.mkdir(parents=True, exist_ok=True)
 
     model_path = settings.MODEL_DIR / f"{settings.MODEL_NAME}.model"
 
@@ -38,24 +37,19 @@ if __name__ == "__main__":
 
         if settings.UPLOAD_TO_QDRANT:
             logger.info(f"Uploading existing vectors to Qdrant: {settings.QDRANT_COLLECTION}")
-            upload_word2vec_to_qdrant(
-                model_path=str(model_path),
-                host=settings.QDRANT_HOST,
-                port=settings.QDRANT_PORT,
-                collection_name=settings.QDRANT_COLLECTION
-            )
+            upload_word2vec_to_qdrant(model_path=str(model_path))
         exit(0)
 
     # Download Wikipedia dump if not found
-    if not Path(settings.WIKI_PATH).exists():
+    if not Path(settings.DATASET_PATH).exists():
         logger.info("Wikipedia dump not found. Downloading...")
-        download(settings.WIKI_URL, str(settings.WIKI_PATH))
-        logger.info(f"Download complete: {settings.WIKI_PATH}")
+        download(settings.DATASET_URL, str(settings.DATASET_PATH))
+        logger.info(f"Download complete: {settings.DATASET_PATH}")
 
     logger.info("Parsing and tokenizing Wikipedia dump...")
 
-    wiki = WikiCorpus(
-        fname=str(settings.WIKI_PATH),
+    corpus = WikiCorpus(
+        fname=str(settings.DATASET_PATH),
         processes=os.cpu_count(),
         article_min_tokens=15,  # Adjust for quality articles
         token_min_len=2,        # Include short but meaningful words
@@ -63,18 +57,19 @@ if __name__ == "__main__":
         lower=True,
     )
 
-    sentences = [tokens for tokens in tqdm(wiki.get_texts(), desc="Forming sentences from Wikipedia articles")]
-    logger.info(f"Extracted {len(sentences):,} tokenized articles.")
+    sentences = tqdm(
+        corpus.get_texts(),
+        desc="Forming sentences from Wikipedia articles"
+    )
 
     # Train the model using settings directly
-    model = train_word2vec_model(
-        sentences=sentences,
-        save_dir=settings.MODEL_DIR,
-        model_name=settings.MODEL_NAME,
+    model = Word2Vec(
+        sentences,
         vector_size=settings.VECTOR_SIZE,
         window=settings.WINDOW,
         min_count=settings.MIN_COUNT,
-        epochs=settings.EPOCHS
+        epochs=settings.EPOCHS,
+        workers=os.cpu_count()
     )
 
     logger.info("Running evaluation on freshly trained model...")
@@ -82,9 +77,4 @@ if __name__ == "__main__":
 
     if settings.UPLOAD_TO_QDRANT:
         logger.info(f"Uploading vectors to Qdrant: {settings.QDRANT_COLLECTION}")
-        upload_word2vec_to_qdrant(
-            model_path=str(settings.MODEL_DIR / f"{settings.MODEL_NAME}.model"),
-            host=settings.QDRANT_HOST,
-            port=settings.QDRANT_PORT,
-            collection_name=settings.QDRANT_COLLECTION
-        )
+        upload_word2vec_to_qdrant(model_path=str(model_path))

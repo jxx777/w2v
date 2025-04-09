@@ -9,14 +9,14 @@ services:
       - .env  # This file will be read, and its variables set into the container's environment
     environment:
       # Optionally override any env settings here if needed; otherwise, rely on .env.
-      # For example, you could override WIKI_PATH & WIKI_URL for a different language version.
-      WIKI_PATH: datasets/rowiki-latest-pages-articles.xml.bz2
-      WIKI_URL: https://dumps.wikimedia.org/rowiki/latest/rowiki-latest-pages-articles.xml.bz2
+      # For example, you could override DATASET_PATH & DATASET_URL for a different language version.
+      DATASET_PATH: datasets/rowiki-latest-pages-articles.xml.bz2
+      DATASET_URL: https://dumps.wikimedia.org/rowiki/latest/rowiki-latest-pages-articles.xml.bz2
       MODEL_NAME: word2vec_ro
-      EPOCHS: 1
+
       UPLOAD_TO_QDRANT: false
       QDRANT_HOST: qdrant
-      QDRANT_COLLECTION: word2vec_ro
+      QDRANT_COLLECTION: ${MODEL_NAME} # Useful if you have another format
     depends_on:
       - qdrant
 
