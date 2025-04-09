@@ -11,7 +11,7 @@ from scripts.evaluate import run_full_evaluation
 from scripts.train import train_word2vec_model
 from scripts.upload_qdrant import upload_word2vec_to_qdrant
 
-from utils.download import download_with_progress
+from utils.download import download
 
 #  Setup
 load_dotenv()
@@ -44,41 +44,15 @@ if __name__ == "__main__":
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
     WIKI_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    themes = [
-        "food",          # mâncare
-        "gastronomy",    # gastronomie
-        "cuisine",       # bucătărie
-        "nutrition",     # alimentație
-        "geography",     # geografie
-        "topography",    # topografie
-        "culture",       # cultură
-        "traditions",    # tradiții
-        "arts",          # arte
-        "folklore",      # folclor
-        "conflict",      # conflict
-        "war",           # război
-        "politics",      # politică
-        "legal",         # juridic
-        "law",           # drept
-        "economy",       # economie
-        "technology",    # tehnologie
-        "health",        # sănătate
-        "education",     # educație
-        "history",       # istorie
-        "religion",      # religie
-        "sport",         # sport
-        "entertainment"  # divertisment
-    ]
-
     if Path(MODEL_PATH).exists() and not MODEL_OVERRIDE:
         logger.info(f"Using existing model at {MODEL_PATH}. Skipping corpus extraction & training.")
         model = Word2Vec.load(MODEL_PATH)
 
-        logger.info("📊 Running evaluation on loaded model...")
-        run_full_evaluation(model, themes)
+        logger.info("Running evaluation on loaded model...")
+        run_full_evaluation(model)
 
         if UPLOAD_TO_QDRANT:
-            logger.info(f"🚀 Uploading existing vectors to Qdrant: {QDRANT_COLLECTION}")
+            logger.info(f"Uploading existing vectors to Qdrant: {QDRANT_COLLECTION}")
             upload_word2vec_to_qdrant(
                 model_path=MODEL_PATH,
                 host=QDRANT_HOST,
@@ -88,13 +62,15 @@ if __name__ == "__main__":
 
         exit(0)  # skip rest of training pipeline
 
-    # Else — proceed with full pipeline
+
     if not WIKI_PATH.exists():
         logger.info("Wikipedia dump not found. Downloading...")
-        download_with_progress(WIKI_URL, str(WIKI_PATH))
+
+        download(WIKI_URL, str(WIKI_PATH))
         logger.info(f"Download complete: {WIKI_PATH}")
 
     logger.info("Parsing and tokenizing Wikipedia dump...")
+
     wiki = WikiCorpus(
         fname=str(WIKI_PATH),
         processes=os.cpu_count(),
@@ -117,8 +93,8 @@ if __name__ == "__main__":
         epochs=EPOCHS
     )
 
-    logger.info("📊 Running evaluation on freshly trained model...")
-    run_full_evaluation(model, themes)
+    logger.info("Running evaluation on freshly trained model...")
+    run_full_evaluation(model)
 
     if UPLOAD_TO_QDRANT:
         logger.info(f"Uploading vectors to Qdrant: {QDRANT_COLLECTION}")

@@ -7,7 +7,7 @@ class DownloadProgressBar(tqdm):
             self.total = total_size
         self.update(block_num * block_size - self.n)
 
-def download_with_progress(url, destination):
+def download(url, destination):
     with DownloadProgressBar(unit='B', unit_scale=True, miniters=1, desc="Downloading") as t:
         urllib.request.urlretrieve(url, filename=destination, reporthook=t.update_to)
     print()

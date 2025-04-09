@@ -11,8 +11,34 @@ from utils.cluster_utils import generate_topic_clusters, print_topic_clusters
 logging.basicConfig(level=logging.INFO, format='%(asctime)s — %(levelname)s — %(message)s')
 logger = logging.getLogger("full_evaluation")
 
+themes: List[str] = [
+    "food",          # mâncare
+    "gastronomy",    # gastronomie
+    "cuisine",       # bucătărie
+    "nutrition",     # alimentație
+    "geography",     # geografie
+    "topography",    # topografie
+    "culture",       # cultură
+    "traditions",    # tradiții
+    "arts",          # arte
+    "folklore",      # folclor
+    "conflict",      # conflict
+    "war",           # război
+    "politics",      # politică
+    "legal",         # juridic
+    "law",           # drept
+    "economy",       # economie
+    "technology",    # tehnologie
+    "health",        # sănătate
+    "education",     # educație
+    "history",       # istorie
+    "religion",      # religie
+    "sport",         # sport
+    "entertainment"  # divertisment
+]
+
 def generate_dynamic_theme_keywords(
-        themes: List[str],
+        evaluation_themes: List[str],
         model: Word2Vec,
         topn: int = 50,
         similarity_threshold: float = 0.6
@@ -22,7 +48,7 @@ def generate_dynamic_theme_keywords(
     using the theme name. Only words exceeding the similarity threshold are returned.
     
     Parameters:
-        themes: List of theme names (e.g., ["food", "geography"]).
+        evaluation_themes: List of theme names (e.g., ["food", "geography"]).
         model: A trained Word2Vec model.
         topn: Number of similar words to retrieve.
         similarity_threshold: Minimum similarity required for inclusion.
@@ -31,7 +57,7 @@ def generate_dynamic_theme_keywords(
         A dictionary mapping each theme to its dynamically generated keyword list.
     """
     dynamic_seeds = {}
-    for theme in themes:
+    for theme in evaluation_themes:
         if theme not in model.wv:
             logger.warning(f"Theme '{theme}' not in the model vocabulary. Skipping.")
             dynamic_seeds[theme] = []
@@ -169,9 +195,15 @@ def evaluate_inter_theme_similarity(
 
     return inter_theme
 
-def run_full_evaluation(model: Word2Vec, themes: List[str]) -> None:
+def run_full_evaluation(model: Word2Vec, evaluation_themes: List[str]) -> None:
     # 1. Generate dynamic keywords for each theme.
-    dynamic_seeds = generate_dynamic_theme_keywords(themes, model, topn=50, similarity_threshold=0.6)
+    dynamic_seeds = generate_dynamic_theme_keywords(
+        evaluation_themes,
+        model,
+        topn=50,
+        similarity_threshold=0.6
+    )
+
     print("---- Dynamic Theme Seeds ----")
     for theme, seeds in dynamic_seeds.items():
         print(f"{theme.capitalize():<12} → {seeds}")
@@ -184,14 +216,25 @@ def run_full_evaluation(model: Word2Vec, themes: List[str]) -> None:
 
     # 3. Evaluate intra-theme seed similarity.
     print("\n---- Intra-Theme Seed Similarity ----")
-    intra_metrics = evaluate_intra_theme_similarity(dynamic_seeds, model, threshold=0.65)
+    intra_metrics = evaluate_intra_theme_similarity(
+        dynamic_seeds,
+        model,
+        threshold=0.65
+    )
+
     for theme, metrics in intra_metrics.items():
         print(f"{theme.capitalize():<12} → Mean: {metrics['mean_similarity']:.2f}, "
               f"Std Dev: {metrics['std_similarity']:.2f}, Coverage: {metrics['coverage']*100:.1f}%")
 
     # 4. Evaluate similarity density of related words.
     print("\n---- Similarity Density (Related Words) ----")
-    density_scores, density_details = evaluate_similarity_density_extended(dynamic_seeds, model, topn=10, threshold=0.65)
+    density_scores, density_details = evaluate_similarity_density_extended(
+        dynamic_seeds,
+        model,
+        topn=10,
+        threshold=0.65
+    )
+
     for theme, score in density_scores.items():
         status = "✅" if score > 0.5 else "⚠️"
         details = density_details.get(theme, {})
@@ -200,6 +243,10 @@ def run_full_evaluation(model: Word2Vec, themes: List[str]) -> None:
 
     # 5. Evaluate inter-theme seed similarity.
     print("\n---- Inter-Theme Seed Similarity ----")
-    inter_theme = evaluate_inter_theme_similarity(dynamic_seeds, model)
+    inter_theme = evaluate_inter_theme_similarity(
+        dynamic_seeds,
+        model
+    )
+
     for (theme_a, theme_b), sim in inter_theme.items():
         print(f"Inter-similarity between {theme_a.capitalize()} & {theme_b.capitalize()}: {sim:.2f}")

@@ -15,16 +15,13 @@ def upload_word2vec_to_qdrant(
         distance: Distance = Distance.COSINE,
         batch_size: int = 1000
 ):
-    # ✅ Load the trained model
     logger.info(f"Loading model from: {model_path}")
     model: Word2Vec = Word2Vec.load(model_path)
     vector_size = model.vector_size
     vocab = model.wv.index_to_key
 
-    # ✅ Connect to Qdrant
     client = QdrantClient(host=host, port=port)
 
-    # ✅ Create or recreate the collection with correct params
     logger.info(f"Creating Qdrant collection: '{collection_name}' with vector size {vector_size}")
     client.create_collection(
         collection_name=collection_name,
@@ -34,8 +31,7 @@ def upload_word2vec_to_qdrant(
         )
     )
 
-    # ✅ Build & upload points in batches
-    logger.info(f"📤 Uploading {len(vocab):,} vectors to Qdrant...")
+    logger.info(f"Uploading {len(vocab):,} vectors to Qdrant...")
 
     points = []
     for idx, word in enumerate(vocab):

@@ -16,6 +16,7 @@ __pycache__/
 # Training output directories
 models/
 checkpoints/
+noteboooks/
 
 # Datasets — large, external sources
 datasets/
@@ -38,4 +39,4 @@ venv/
 # System files
 .DS_Store
 Thumbs.db
-
+/.idea/
