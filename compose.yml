@@ -14,9 +14,9 @@ services:
       DATASET_URL: https://dumps.wikimedia.org/rowiki/latest/rowiki-latest-pages-articles.xml.bz2
       MODEL_NAME: word2vec_ro
       MODEL_RETRAIN: false
-      UPLOAD_TO_QDRANT: true
-      QDRANT_HOST: qdrant
-      QDRANT_COLLECTION: ${MODEL_NAME} # Useful if you have another format
+      UPLOAD_TO_VECTORDB: true
+      VECTORDB_HOST: qdrant
+      VECTORDB_COLLECTION: ${MODEL_NAME} # Useful if you have another format
     depends_on:
       - qdrant
 

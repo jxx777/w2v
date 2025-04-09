@@ -1,8 +1,7 @@
-# config.py
-from pydantic_settings import BaseSettings  # Updated import location
+from pydantic_settings import BaseSettings
 from pathlib import Path
 
-
+# Base class for settings, allowing values to be overridden by environment variables (.env)
 class Settings(BaseSettings):
     # Wikipedia dump
     DATASET_URL: str = "https://dumps.wikimedia.org/rowiki/latest/rowiki-latest-pages-articles.xml.bz2"
@@ -20,10 +19,10 @@ class Settings(BaseSettings):
     EPOCHS: int = 10
 
     # Qdrant integration
-    UPLOAD_TO_QDRANT: bool = False
-    QDRANT_HOST: str = "127.0.0.1"
-    QDRANT_PORT: int = 6333
-    QDRANT_COLLECTION: str = "word2vec_en"
+    UPLOAD_TO_VECTORDB: bool = False
+    VECTORDB_HOST: str = "127.0.0.1"
+    VECTORDB_PORT: int = 6333
+    VECTORDB_COLLECTION: str = "word2vec_en"
 
     class Config:
         env_file = ".env"
