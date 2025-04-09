@@ -35,6 +35,9 @@ def train_word2vec_model(
     print(f"Training model for {epochs} epochs on {len(sentences):,} examples...")
     model.train(sentences, total_examples=model.corpus_count, epochs=epochs)
 
+    training_loss = model.get_latest_training_loss()
+    print(training_loss)
+
     save_path = Path(save_dir) / f"{model_name}.model"
     model.save(str(save_path))
 

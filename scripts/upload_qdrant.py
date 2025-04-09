@@ -8,7 +8,7 @@ logger = logging.getLogger("qdrant-upload")
 
 def upload_word2vec_to_qdrant(
         model_path: str,
-        batch_size: int = 1000,
+        batch_size: int = 20000,
         distance: Distance = Distance.COSINE
 ):
     """

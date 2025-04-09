@@ -13,8 +13,8 @@ services:
       DATASET_PATH: datasets/rowiki-latest-pages-articles.xml.bz2
       DATASET_URL: https://dumps.wikimedia.org/rowiki/latest/rowiki-latest-pages-articles.xml.bz2
       MODEL_NAME: word2vec_ro
-
-      UPLOAD_TO_QDRANT: false
+      MODEL_RETRAIN: false
+      UPLOAD_TO_QDRANT: true
       QDRANT_HOST: qdrant
       QDRANT_COLLECTION: ${MODEL_NAME} # Useful if you have another format
     depends_on:
