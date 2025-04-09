@@ -14,7 +14,7 @@ services:
       DATASET_URL: https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2
       MODEL_NAME: word2vec_enwiki-latest-pages-articles
       MODEL_TYPE: Word2Vec
-      MODEL_RETRAIN: false
+      MODEL_TRAIN: true
       UPLOAD_TO_VECTORDB: true
       VECTORDB_HOST: qdrant
       VECTORDB_COLLECTION: ${MODEL_NAME} # Useful if you have another format

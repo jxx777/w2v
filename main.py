@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     # Model exists: Skip corpus extraction & training, run queries + optionally upload to vectordb
     model_path: Path = settings.MODEL_DIR / f"{settings.MODEL_NAME}.model" # Relative to cd
-    if model_path.exists() and not settings.MODEL_RETRAIN:
+    if model_path.exists() and not settings.MODEL_TRAIN:
         logger.info(f"Using existing model at {model_path}. Skipping corpus extraction & training.")
         model = Word2Vec.load(str(model_path))
 

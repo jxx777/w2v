@@ -39,11 +39,11 @@ def upload_embedding_model_to_quadrant(
     vocab = model.wv.index_to_key
 
     client = QdrantClient(
-        host=settings.QDRANT_HOST,
-        port=settings.QDRANT_PORT
+        host=settings.VECTORDB_HOST,
+        port=settings.VECTORDB_PORT
     )
 
-    collection_name = settings.QDRANT_COLLECTION
+    collection_name = settings.VECTORDB_COLLECTION
 
     if client.collection_exists(collection_name):
         logger.info(f"Collection '{collection_name}' already exists. Deleting it.")
