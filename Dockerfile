@@ -13,8 +13,5 @@ COPY . .
 # Install Python deps
 RUN pip install --no-cache-dir -r requirements.txt
 
-# NLTK data (used in tokenization)
-RUN python -m nltk.downloader punkt
-
 # Entrypoint
 CMD ["python", "main.py"]

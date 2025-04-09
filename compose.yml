@@ -5,30 +5,18 @@ services:
     volumes:
       - ./datasets:/app/datasets
       - ./models:/app/models
+    env_file:
+      - .env  # This file will be read, and its variables set into the container's environment
     environment:
-      # Dataset config
-      WIKI_URL: https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2
+      # Optionally override any env settings here if needed; otherwise, rely on .env.
+      # For example, you could override WIKI_PATH & WIKI_URL for a different language version.
       WIKI_PATH: datasets/rowiki-latest-pages-articles.xml.bz2
-
-      # Model override
-      MODEL_OVERRIDE: false
-
-      # Model save config
-      MODEL_DIR: models
+      WIKI_URL: https://dumps.wikimedia.org/rowiki/latest/rowiki-latest-pages-articles.xml.bz2
       MODEL_NAME: word2vec_ro
-
-      # Model hyperparameters
-      VECTOR_SIZE: 100
-      WINDOW: 5
-      MIN_COUNT: 3
-      EPOCHS: 1 
-
-      # Qdrant upload control
+      EPOCHS: 1
       UPLOAD_TO_QDRANT: false
-      QDRANT_HOST: qdrant  # You can change to "127.0.0.1" if not using as service
-      QDRANT_PORT: 6333
+      QDRANT_HOST: qdrant
       QDRANT_COLLECTION: word2vec_ro
-
     depends_on:
       - qdrant
 

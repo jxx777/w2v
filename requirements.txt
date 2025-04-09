@@ -13,3 +13,5 @@ numpy~=1.26.4
 qdrant-client~=1.13.3
 pandas~=2.2.3
 smart-open~=7.1.0
+pydantic~=2.11.2
+pydantic-settings~=2.8.1

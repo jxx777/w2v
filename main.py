@@ -1,106 +1,90 @@
 import logging
-import os
 from pathlib import Path
+import os
 
-from dotenv import load_dotenv
 from gensim.corpora import WikiCorpus
 from gensim.models import Word2Vec
 from tqdm import tqdm
 
-from scripts.evaluate import run_full_evaluation
+from config import Settings
+from scripts.evaluate import run_full_evaluation, themes
 from scripts.train import train_word2vec_model
 from scripts.upload_qdrant import upload_word2vec_to_qdrant
-
 from utils.download import download
 
-#  Setup
-load_dotenv()
+# Load centralized configuration for better management
+settings = Settings()
+
+# Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s — %(levelname)s — %(message)s')
 logger = logging.getLogger("main")
 
-# Load env config
-WIKI_URL: str = os.getenv("WIKI_URL")
-WIKI_PATH: Path = Path(os.getenv("WIKI_PATH"))
-MODEL_DIR: Path = Path(os.getenv("MODEL_DIR"))
-MODEL_NAME: str = os.getenv("MODEL_NAME")
-MODEL_PATH: str = str(MODEL_DIR / f"{MODEL_NAME}.model")
-
-# Hyperparameters
-VECTOR_SIZE: int = int(os.getenv("VECTOR_SIZE", 300))
-WINDOW: int = int(os.getenv("WINDOW", 5))
-MIN_COUNT: int = int(os.getenv("MIN_COUNT", 3))
-EPOCHS: int = int(os.getenv("EPOCHS", 10))
-
-# Qdrant config
-UPLOAD_TO_QDRANT: bool = os.getenv("UPLOAD_TO_QDRANT", "false").lower() == "true"
-QDRANT_COLLECTION: str = os.getenv("QDRANT_COLLECTION", MODEL_NAME)
-QDRANT_HOST: str = os.getenv("QDRANT_HOST", "127.0.0.1")
-QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", 6333))
-
-MODEL_OVERRIDE: bool = os.getenv("MODEL_OVERRIDE", "false").lower() == "true"
-
-# Main logic
 if __name__ == "__main__":
-    MODEL_DIR.mkdir(parents=True, exist_ok=True)
-    WIKI_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    if Path(MODEL_PATH).exists() and not MODEL_OVERRIDE:
-        logger.info(f"Using existing model at {MODEL_PATH}. Skipping corpus extraction & training.")
-        model = Word2Vec.load(MODEL_PATH)
+    logger.info("Current configuration settings:\n%s", settings.model_dump_json(indent=2))
+    # Ensure that necessary directories exist
+    settings.MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    Path(settings.WIKI_PATH).parent.mkdir(parents=True, exist_ok=True)
+
+    model_path = settings.MODEL_DIR / f"{settings.MODEL_NAME}.model"
+
+    # If a pre-trained model exists and override is not enabled, load and evaluate it
+    if model_path.exists() and not settings.MODEL_OVERRIDE:
+        logger.info(f"Using existing model at {model_path}. Skipping corpus extraction & training.")
+        model = Word2Vec.load(str(model_path))
 
         logger.info("Running evaluation on loaded model...")
-        run_full_evaluation(model)
+        run_full_evaluation(model, themes)
 
-        if UPLOAD_TO_QDRANT:
-            logger.info(f"Uploading existing vectors to Qdrant: {QDRANT_COLLECTION}")
+        if settings.UPLOAD_TO_QDRANT:
+            logger.info(f"Uploading existing vectors to Qdrant: {settings.QDRANT_COLLECTION}")
             upload_word2vec_to_qdrant(
-                model_path=MODEL_PATH,
-                host=QDRANT_HOST,
-                port=QDRANT_PORT,
-                collection_name=QDRANT_COLLECTION
+                model_path=str(model_path),
+                host=settings.QDRANT_HOST,
+                port=settings.QDRANT_PORT,
+                collection_name=settings.QDRANT_COLLECTION
             )
+        exit(0)
 
-        exit(0)  # skip rest of training pipeline
-
-
-    if not WIKI_PATH.exists():
+    # Download Wikipedia dump if not found
+    if not Path(settings.WIKI_PATH).exists():
         logger.info("Wikipedia dump not found. Downloading...")
-
-        download(WIKI_URL, str(WIKI_PATH))
-        logger.info(f"Download complete: {WIKI_PATH}")
+        download(settings.WIKI_URL, str(settings.WIKI_PATH))
+        logger.info(f"Download complete: {settings.WIKI_PATH}")
 
     logger.info("Parsing and tokenizing Wikipedia dump...")
 
     wiki = WikiCorpus(
-        fname=str(WIKI_PATH),
+        fname=str(settings.WIKI_PATH),
         processes=os.cpu_count(),
-        article_min_tokens=15,  # Adjusted threshold to include quality articles (tweak based on corpus statistics)
-        token_min_len=2,  # Lower bound lowered to keep short but meaningful words, e.g., "vin"
+        article_min_tokens=15,  # Adjust for quality articles
+        token_min_len=2,        # Include short but meaningful words
         token_max_len=30,
         lower=True,
     )
 
-    sentences = [tokens for tokens in tqdm(wiki.get_texts(), desc="Forming sentences from wikipedia articles")]
+    sentences = [tokens for tokens in tqdm(wiki.get_texts(), desc="Forming sentences from Wikipedia articles")]
     logger.info(f"Extracted {len(sentences):,} tokenized articles.")
 
+    # Train the model using settings directly
     model = train_word2vec_model(
         sentences=sentences,
-        save_dir=MODEL_DIR,
-        model_name=MODEL_NAME,
-        vector_size=VECTOR_SIZE,
-        window=WINDOW,
-        min_count=MIN_COUNT,
-        epochs=EPOCHS
+        save_dir=settings.MODEL_DIR,
+        model_name=settings.MODEL_NAME,
+        vector_size=settings.VECTOR_SIZE,
+        window=settings.WINDOW,
+        min_count=settings.MIN_COUNT,
+        epochs=settings.EPOCHS
     )
 
     logger.info("Running evaluation on freshly trained model...")
-    run_full_evaluation(model)
+    run_full_evaluation(model, themes)  # Pass the themes list
 
-    if UPLOAD_TO_QDRANT:
-        logger.info(f"Uploading vectors to Qdrant: {QDRANT_COLLECTION}")
+    if settings.UPLOAD_TO_QDRANT:
+        logger.info(f"Uploading vectors to Qdrant: {settings.QDRANT_COLLECTION}")
         upload_word2vec_to_qdrant(
-            model_path=str(MODEL_DIR / f"{MODEL_NAME}.model"),
-            host=QDRANT_HOST,
-            port=QDRANT_PORT,
-            collection_name=QDRANT_COLLECTION
+            model_path=str(settings.MODEL_DIR / f"{settings.MODEL_NAME}.model"),
+            host=settings.QDRANT_HOST,
+            port=settings.QDRANT_PORT,
+            collection_name=settings.QDRANT_COLLECTION
         )
