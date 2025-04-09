@@ -73,7 +73,6 @@ def train_embedding_model(
         model.train(
             sentences,
             total_examples=model.corpus_count,
-            epochs=1
         )
 
         # Save checkpoint after each epoch
