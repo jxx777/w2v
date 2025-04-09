@@ -52,9 +52,16 @@ if __name__ == "__main__":
         download(settings.DATASET_URL, str(settings.DATASET_PATH))
         logger.info(f"Download complete: {settings.DATASET_PATH}")
 
+    # We're 'caching' the resulted sentences so subsequent runs are faster
     corpus_checkpoint = Path(f"./checkpoints/{settings.MODEL_NAME}.pkl")
-    sentences = load_or_tokenize_wiki(settings.DATASET_PATH, corpus_checkpoint)
 
+    # Should pickle checkpoint exist - we return that early, else iterate corpus
+    sentences = load_or_tokenize_wiki(
+        settings.DATASET_PATH,
+        corpus_checkpoint
+    )
+
+    # Embedding model training entrypoint
     model = train_embedding_model(
         model_type=settings.MODEL_TYPE,
         sentences=sentences,
@@ -63,9 +70,11 @@ if __name__ == "__main__":
         vector_size=settings.VECTOR_SIZE,
         window=settings.WINDOW,
         min_count=settings.MIN_COUNT,
-        epochs=settings.EPOCHS
+        epochs=settings.EPOCHS,
+        resume=settings.MODEL_RESUME
     )
 
+    # After training the model
     run_simple_queries(model)
 
     if settings.UPLOAD_TO_VECTORDB:

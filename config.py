@@ -5,13 +5,14 @@ from pathlib import Path
 class Settings(BaseSettings):
     # Dataset
     DATASET_URL: str = "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2"
-    DATASET_PATH: Path = "datasets/enwiki-latest-pages-articles.xml.bz2"
+    DATASET_PATH: Path = "./datasets/enwiki-latest-pages-articles.xml.bz2"
 
     # Model configuration
     MODEL_TYPE: str = "Word2Vec"
     MODEL_RETRAIN: bool = False
     MODEL_DIR: Path = Path("models")
     MODEL_NAME: str = "word2vec_enwiki-latest-pages-articles"
+    MODEL_RESUME: bool = False  # Or True to resume by default
 
     # Model hyperparameters (Gensim)
     VECTOR_SIZE: int = 300

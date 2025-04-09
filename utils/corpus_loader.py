@@ -18,6 +18,7 @@ def load_or_tokenize_wiki(dataset_path: Path, checkpoint_path: Path):
         token_max_len=30,
         lower=True
     )
+
     sentences = list(tqdm(wiki.get_texts(), desc="Forming sentences from Wikipedia articles"))
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
     with open(checkpoint_path, "wb") as f:
