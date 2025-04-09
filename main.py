@@ -27,16 +27,28 @@ if __name__ == "__main__":
 
     model_path = settings.MODEL_DIR / f"{settings.MODEL_NAME}.model"
 
-    # If a pre-trained model exists and override is not enabled, load and evaluate it
     if model_path.exists() and not settings.MODEL_RETRAIN:
         logger.info(f"Using existing model at {model_path}. Skipping corpus extraction & training.")
         model = Word2Vec.load(str(model_path))
+
+        # Define a dictionary with some useful model parameters:
+        loaded_model_settings_to_review = {
+            "vector_size": model.vector_size,
+            "window": model.window,
+            "min_count": model.min_count,
+            "sg": model.sg,
+            "hs": model.hs,
+            "negative": model.negative,
+        }
+
+        logger.info("Loaded model settings:\n%s", loaded_model_settings_to_review)
 
         run_simple_queries(model)
 
         if settings.UPLOAD_TO_QDRANT:
             logger.info(f"Uploading existing vectors to Qdrant: {settings.QDRANT_COLLECTION}")
             upload_word2vec_to_qdrant(model_path=str(model_path))
+
         exit(0)
 
     # Download Wikipedia dump if not found
@@ -51,7 +63,7 @@ if __name__ == "__main__":
         fname=str(settings.DATASET_PATH),
         processes=os.cpu_count(),
         article_min_tokens=15,  # Adjust for quality articles
-        token_min_len=2,        # Include short but meaningful words
+        token_min_len=2,  # Include short but meaningful words
         token_max_len=30,
         lower=True,
     )

@@ -5,8 +5,8 @@ from pathlib import Path
 
 class Settings(BaseSettings):
     # Wikipedia dump
-    DATASET_URL: str
-    DATASET_PATH: Path
+    DATASET_URL: str = "https://dumps.wikimedia.org/rowiki/latest/rowiki-latest-pages-articles.xml.bz2"
+    DATASET_PATH: Path = "datasets/rowiki-latest-pages-articles.xml.bz2"
 
     # Model configuration
     MODEL_RETRAIN: bool = False
@@ -24,8 +24,6 @@ class Settings(BaseSettings):
     QDRANT_HOST: str = "127.0.0.1"
     QDRANT_PORT: int = 6333
     QDRANT_COLLECTION: str = "word2vec_en"
-
-    LANGUAGE_CODE: str = "en"
 
     class Config:
         env_file = ".env"
