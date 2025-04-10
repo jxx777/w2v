@@ -14,8 +14,8 @@ def train_embedding_model(
         epochs: int,
         resume: bool = False
 ):
-    save_path = save_dir / f"{model_name}.model"
-    vec_path = save_dir / f"{model_name}.vec"
+    save_path: Path = Path(save_dir / f"{model_name}.model")
+    vec_path: Path = Path(save_dir / f"{model_name}.vec")
 
     if resume and save_path.exists():
         print(f"Resuming training from existing model at {save_path}")
@@ -73,7 +73,7 @@ def train_embedding_model(
         model.train(
             sentences,
             total_examples=model.corpus_count,
-            epochs=1
+            epochs=model.epochs
         )
 
         # Save checkpoint after each epoch

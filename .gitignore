@@ -16,7 +16,7 @@ __pycache__/
 # Training output directories
 models/
 checkpoints/
-noteboooks/
+notebooks/
 
 # Datasets — large, external sources
 datasets/

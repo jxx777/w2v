@@ -5,8 +5,7 @@
 # Ignore IDE-specific configuration files
 *.iml
 
-noteboooks/
-
+notebooks/
 datasets/
-
+checkpoints
 models/

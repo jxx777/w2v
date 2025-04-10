@@ -1,24 +1,23 @@
 services:
-  word2vec-trainer:
+  embeddings-trainer:
     build: .
     container_name: word2vec_trainer
     volumes:
-      - ./datasets:/app/datasets
-      - ./models:/app/models
+      - ./models:/models
+      - ./datasets:/datasets
+      - ./checkpoints:/checkpoints
     env_file:
-      - .env  # This file will be read, and its variables set into the container's environment
+      - .env  # These variables will be loaded into the container's environment.
     environment:
-      # Optionally override any env settings here if needed; otherwise, rely on .env.
-      # For example, you could override DATASET_PATH & DATASET_URL for a different language version.
-      DATASET_PATH: datasets/enwiki-latest-pages-articles.xml.bz2
+      # Override variables if needed; otherwise, they will use the values from .env.
       DATASET_URL: https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2
       MODEL_NAME: word2vec_enwiki-latest-pages-articles
       MODEL_TYPE: Word2Vec
       MODEL_TRAIN: true
-      CHECKPOINT_STRATEGY: streaming # or 'serialized'
+      CORPUS_CHECKPOINT_STRATEGY: streaming
       UPLOAD_TO_VECTORDB: true
       VECTORDB_HOST: qdrant
-      VECTORDB_COLLECTION: ${MODEL_NAME} # Useful if you have another format
+      VECTORDB_COLLECTION: word2vec_enwiki-latest-pages-articles
     depends_on:
       - qdrant
 

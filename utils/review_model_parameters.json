@@ -11,7 +11,7 @@
   "batch_words": true,
   "alpha": true,
   "min_alpha": true,
-  "shrink_windows": true,
+  "shrink_windows": false,
   "random": true,
   "ns_exponent": true,
   "cbow_mean": true,
