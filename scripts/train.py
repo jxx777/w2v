@@ -77,8 +77,8 @@ def train_embedding_model(
         )
 
         # Save checkpoint after each epoch
-        model.save(str(save_path))
-        model.wv.save_word2vec_format(str(vec_path))
+        model.save(str(save_path)) # Saves to .model
+        model.wv.save_word2vec_format(str(vec_path)) # Saves to .vec
         print(f"Checkpoint saved after epoch {epoch + 1}")
 
     training_loss = model.get_latest_training_loss()

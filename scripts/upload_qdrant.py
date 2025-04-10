@@ -11,7 +11,7 @@ logger = logging.getLogger("qdrant-upload")
 
 def upload_embedding_model_to_quadrant(
         model_path: str,
-        batch_size: int = 20000,
+        batch_size: int = 15000,
         distance: Distance = Distance.COSINE
 ):
     """
