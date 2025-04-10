@@ -1,5 +1,8 @@
 from pathlib import Path
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
+from typing_extensions import Self  # If you need Self for type hints in Pydantic v2
 
 class Settings(BaseSettings):
     # Directories and file paths
@@ -10,7 +13,8 @@ class Settings(BaseSettings):
     # Dataset configuration
     DATASET_URL: str = "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2"
     DATASET_FILE: str = "enwiki-latest-pages-articles.xml.bz2"
-    DATASET_PATH: Path = DATASET_DIR / DATASET_FILE
+    # This field will be computed from DATASET_DIR and DATASET_FILE
+    DATASET_PATH: Path | None = None
 
     # Model configuration
     MODEL_TYPE: str = "Word2Vec"  # or "fasttext"
@@ -32,6 +36,14 @@ class Settings(BaseSettings):
     VECTORDB_HOST: str = "127.0.0.1"
     VECTORDB_PORT: int = 6333
     VECTORDB_COLLECTION: str = "word2vec_enwiki-latest-pages-articles"
+
+    @model_validator(mode="after")
+    def compute_dataset_path(self) -> Self:
+        # This will run after initialization, ensuring that any overrides from the env
+        # are applied. If DATASET_PATH wasn't explicitly provided, it is computed.
+        if self.DATASET_PATH is None:
+            self.DATASET_PATH = self.DATASET_DIR / self.DATASET_FILE
+        return self
 
     class Config:
         env_file = ".env"

@@ -1,7 +1,5 @@
 import logging
-from pathlib import Path
 
-from gensim.models import Word2Vec, FastText
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams, PointStruct
 
@@ -12,30 +10,21 @@ logger = logging.getLogger("qdrant-upload")
 
 
 def upload_embedding_model_to_quadrant(
-        model_path: Path,
+        model,
+        collection_name: str,
         batch_size: int = 15000,
         distance: Distance = Distance.COSINE
 ):
     """
-    Uploads a vector embeddings model's vectors to Qdrant using configuration
-    parameters specific to Qdrant from the centralized config.
+    Uploads vectors from a preloaded embedding model to Qdrant.
 
     Parameters:
-        model_path: Path to the embedding model (.model).
+        model: Pre-loaded Word2Vec or FastText model.
+        collection_name: The target collection name for Qdrant.
         batch_size: Number of vectors to upload in each batch.
         distance: Distance metric for vector similarity.
     """
-
-    logger.info(f"Loading model from: {model_path}")
-
-    model_type = settings.MODEL_TYPE.lower()
-    match model_type:
-        case "word2vec":
-            model = Word2Vec.load(str(model_path))
-        case "fasttext":
-            model = FastText.load(str(model_path))
-        case _:
-            raise ValueError(f"Unsupported model type '{settings.MODEL_TYPE}'")
+    logger.info("Starting model upload to Qdrant...")
 
     vector_size = model.vector_size
     vocab = model.wv.index_to_key
@@ -44,8 +33,6 @@ def upload_embedding_model_to_quadrant(
         host=settings.VECTORDB_HOST,
         port=settings.VECTORDB_PORT
     )
-
-    collection_name = settings.VECTORDB_COLLECTION
 
     if client.collection_exists(collection_name):
         logger.info(f"Collection '{collection_name}' already exists. Deleting it.")
@@ -61,7 +48,6 @@ def upload_embedding_model_to_quadrant(
     )
 
     logger.info(f"Uploading {len(vocab):,} vectors to Qdrant...")
-
     points = []
     for idx, word in enumerate(vocab):
         points.append(PointStruct(
@@ -69,7 +55,6 @@ def upload_embedding_model_to_quadrant(
             vector=model.wv[word].tolist(),
             payload={"word": word}
         ))
-
         if len(points) == batch_size or idx == len(vocab) - 1:
             client.upsert(collection_name=collection_name, points=points)
             logger.info(f"Uploaded {idx + 1:,} / {len(vocab):,}")
