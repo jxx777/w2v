@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     DATASET_PATH: Path = "./datasets/enwiki-latest-pages-articles.xml.bz2"
 
     # Corpus storing strategy
-    CHECKPOINT_STRATEGY = "streaming"
+    CHECKPOINT_STRATEGY: str = "streaming"
 
     # Model configuration
     MODEL_TYPE: str = "Word2Vec"
