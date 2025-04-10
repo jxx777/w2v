@@ -26,7 +26,10 @@ def train_embedding_model(
                 model = Word2Vec.load(str(save_path))
             case _:
                 raise ValueError(f"Unsupported model_type '{model_type}'.")
-        model.build_vocab(sentences, update=True)
+        model.build_vocab(
+            sentences,
+            update=True
+        )
     else:
         print(f"Initializing new {model_type} model...")
         match model_type.lower():
@@ -68,18 +71,15 @@ def train_embedding_model(
         model.build_vocab(sentences)
 
     print(f"Training {model_type} model for {epochs} epochs...")
-    for epoch in range(epochs):
-        print(f"Epoch {epoch + 1}/{epochs}")
-        model.train(
-            sentences,
-            total_examples=model.corpus_count,
-            epochs=model.epochs
-        )
+    model.train(
+        sentences,
+        total_examples=model.corpus_count,
+        epochs=epochs
+    )
 
-        # Save checkpoint after each epoch
-        model.save(str(save_path)) # Saves to .model
-        model.wv.save_word2vec_format(str(vec_path)) # Saves to .vec
-        print(f"Checkpoint saved after epoch {epoch + 1}")
+    # Save model to appropriate formats
+    model.save(str(save_path)) # Saves to .model
+    model.wv.save_word2vec_format(str(vec_path)) # Saves to .vec
 
     training_loss = model.get_latest_training_loss()
     print(f"Final training loss: {training_loss}")

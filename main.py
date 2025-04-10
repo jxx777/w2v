@@ -26,7 +26,7 @@ if __name__ == "__main__":
     logger.info("Current configuration settings:\n%s", settings.model_dump_json(indent=2))
 
     # Build the model path based on settings
-    model_path = settings.MODEL_DIR / f"{settings.MODEL_NAME}.model"
+    model_path: Path = Path(settings.MODEL_DIR / f"{settings.MODEL_NAME}.model")
 
     # Use existing model if present and training is disabled
     if model_path.exists() and not settings.MODEL_TRAIN:
@@ -45,9 +45,9 @@ if __name__ == "__main__":
         # Optionally upload to vector database
         if settings.UPLOAD_TO_VECTORDB:
             logger.info(f"Uploading vectors to vectordb: {settings.VECTORDB_COLLECTION}")
-            upload_embedding_model_to_quadrant(model_path=str(model_path))
+            upload_embedding_model_to_quadrant(model_path=model_path)
 
-        # Add whatever other routines you want to do with the existing model can be called here...
+        # Whatever other routines you want to do with the existing model can be called here...
 
         exit(0)
 
@@ -94,4 +94,4 @@ if __name__ == "__main__":
     # Optionally upload vectors to the vector database
     if settings.UPLOAD_TO_VECTORDB:
         logger.info(f"Uploading vectors to vectordb: {settings.VECTORDB_COLLECTION}")
-        upload_embedding_model_to_quadrant(model_path=str(model_path))
+        upload_embedding_model_to_quadrant(model_path=model_path)

@@ -1,4 +1,6 @@
 import logging
+from pathlib import Path
+
 from gensim.models import Word2Vec, FastText
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams, PointStruct
@@ -10,7 +12,7 @@ logger = logging.getLogger("qdrant-upload")
 
 
 def upload_embedding_model_to_quadrant(
-        model_path: str,
+        model_path: Path,
         batch_size: int = 15000,
         distance: Distance = Distance.COSINE
 ):
@@ -29,9 +31,9 @@ def upload_embedding_model_to_quadrant(
     model_type = settings.MODEL_TYPE.lower()
     match model_type:
         case "word2vec":
-            model = Word2Vec.load(model_path)
+            model = Word2Vec.load(str(model_path))
         case "fasttext":
-            model = FastText.load(model_path)
+            model = FastText.load(str(model_path))
         case _:
             raise ValueError(f"Unsupported model type '{settings.MODEL_TYPE}'")
 
