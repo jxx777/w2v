@@ -52,16 +52,20 @@ if __name__ == "__main__":
         download(settings.DATASET_URL, str(settings.DATASET_PATH))
         logger.info(f"Download complete: {settings.DATASET_PATH}")
 
-    # We're 'caching' the resulted sentences so subsequent runs are faster
-    corpus_checkpoint = Path(f"./checkpoints/{settings.MODEL_NAME}.pkl")
+    # Choose checkpoint strategy based on configuration.
+    if settings.CHECKPOINT_STRATEGY == "serialized":
+        corpus_checkpoint = Path(f"./checkpoints/{settings.MODEL_NAME}.pkl")
+        use_streaming = False
+    else:
+        corpus_checkpoint = Path(f"./checkpoints/{settings.MODEL_NAME}.txt")
+        use_streaming = True
 
-    # Should pickle checkpoint exist - we return that early, else iterate corpus
     sentences = load_or_tokenize_wiki(
         settings.DATASET_PATH,
-        corpus_checkpoint
+        corpus_checkpoint,
+        use_streaming=use_streaming
     )
 
-    # Embedding model training entrypoint
     model = train_embedding_model(
         model_type=settings.MODEL_TYPE,
         sentences=sentences,
@@ -71,7 +75,7 @@ if __name__ == "__main__":
         window=settings.WINDOW,
         min_count=settings.MIN_COUNT,
         epochs=settings.EPOCHS,
-        resume=settings.MODEL_RESUME
+        resume=settings.MODEL_RESUME  # if your training function accepts it
     )
 
     # After training the model

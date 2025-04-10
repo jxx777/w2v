@@ -15,6 +15,7 @@ services:
       MODEL_NAME: word2vec_enwiki-latest-pages-articles
       MODEL_TYPE: Word2Vec
       MODEL_TRAIN: true
+      CHECKPOINT_STRATEGY: streaming # or 'serialized'
       UPLOAD_TO_VECTORDB: true
       VECTORDB_HOST: qdrant
       VECTORDB_COLLECTION: ${MODEL_NAME} # Useful if you have another format

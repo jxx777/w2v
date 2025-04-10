@@ -64,7 +64,7 @@ def train_embedding_model(
             case _:
                 raise ValueError(f"Unsupported model_type '{model_type}'.")
 
-        print(f"Building vocabulary from {len(sentences):,} sentences...")
+        print(f"Building vocabulary....")
         model.build_vocab(sentences)
 
     print(f"Training {model_type} model for {epochs} epochs...")

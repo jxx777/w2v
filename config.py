@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     DATASET_URL: str = "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-pages-articles.xml.bz2"
     DATASET_PATH: Path = "./datasets/enwiki-latest-pages-articles.xml.bz2"
 
+    # Corpus storing strategy
+    CHECKPOINT_STRATEGY = "streaming"
+
     # Model configuration
     MODEL_TYPE: str = "Word2Vec"
     MODEL_TRAIN: bool = False
