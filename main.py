@@ -47,13 +47,13 @@ if __name__ == "__main__":
         download(settings.DATASET_URL, str(settings.DATASET_PATH))
         logger.info(f"Download complete: {settings.DATASET_PATH}")
 
-    # Determine the checkpoint file strategy
+    # Determine the checkpoint strategy
     match settings.CORPUS_CHECKPOINT_STRATEGY:
         case "serialized":
-            corpus_checkpoint = settings.CHECKPOINT_DIR / f"{settings.MODEL_NAME}.pkl"
+            corpus_checkpoint = settings.CHECKPOINT_DIR / f"{settings.DATASET_FILE}.pkl"
             use_streaming = False
         case "streaming":
-            corpus_checkpoint = settings.CHECKPOINT_DIR / f"{settings.MODEL_NAME}.txt"
+            corpus_checkpoint = settings.CHECKPOINT_DIR / f"{settings.DATASET_FILE}.txt"
             use_streaming = True
         case _:
             raise ValueError(f"Invalid checkpoint strategy: {settings.CORPUS_CHECKPOINT_STRATEGY}")
@@ -65,8 +65,8 @@ if __name__ == "__main__":
         use_streaming=use_streaming
     )
 
-    # Train the embedding model
-    model = train_embedding_model(
+    # Train the embedding model and extract metadata via spaCy
+    model, corpus_metadata = train_embedding_model(
         model_type=settings.MODEL_TYPE,
         sentences=sentences,
         save_dir=settings.MODEL_DIR,
@@ -84,7 +84,9 @@ if __name__ == "__main__":
     # Optionally upload vectors to the vector database
     if settings.UPLOAD_TO_VECTORDB:
         logger.info(f"Uploading vectors to vectordb: {settings.VECTORDB_COLLECTION}")
+        # Here, if you wish, you can use `corpus_metadata` to enrich payloads in your upload.
         upload_embedding_model_to_quadrant(
             model=model,
-            collection_name=settings.VECTORDB_COLLECTION
+            collection_name=settings.VECTORDB_COLLECTION,
+            metadata=corpus_metadata,
         )

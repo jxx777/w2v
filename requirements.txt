@@ -4,3 +4,4 @@ qdrant-client~=1.13.3
 pydantic-settings~=2.8.1
 pydantic~=2.11.2
 typing_extensions~=4.13.1
+spacy~=3.8.5
