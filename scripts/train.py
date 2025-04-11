@@ -1,7 +1,6 @@
-# scripts/train.py
 import os
 from pathlib import Path
-from gensim.models import FastText, Word2Vec
+from gensim.models import FastText, Word2Vec, Doc2Vec
 from utils.model_loader import load_embedding_model
 
 def train_embedding_model(
@@ -25,39 +24,26 @@ def train_embedding_model(
         model.build_vocab(sentences, update=True)
     else:
         print(f"Initializing new {model_type} model...")
-        if model_type.lower() == "fasttext":
-            model = FastText(
-                vector_size=vector_size,
-                window=window,
-                min_count=min_count,
-                workers=os.cpu_count(),
-                sg=1,
-                hs=0,
-                negative=10,
-                sample=1e-5,
-                seed=42,
-                sorted_vocab=True,
-                shrink_windows=True,
-                batch_words=10000
-            )
-        elif model_type.lower() == "word2vec":
-            model = Word2Vec(
-                vector_size=vector_size,
-                window=window,
-                min_count=min_count,
-                workers=os.cpu_count(),
-                sg=1,
-                hs=0,
-                negative=10,
-                sample=1e-5,
-                seed=42,
-                compute_loss=True,
-                sorted_vocab=True,
-                shrink_windows=True,
-                batch_words=10000
-            )
-        else:
-            raise ValueError(f"Unsupported model_type '{model_type}'")
+        match model_type.lower():
+            case "fasttext":
+                model = FastText(
+                    vector_size=vector_size,
+                    window=window,
+                    min_count=min_count,
+                    workers=os.cpu_count(),
+                    sg=1, hs=0, negative=10, sample=1e-5, seed=42, sorted_vocab=True, shrink_windows=True, batch_words=10000
+                )
+            case "word2vec":
+                model = Word2Vec(
+                    vector_size=vector_size,
+                    window=window,
+                    min_count=min_count,
+                    workers=os.cpu_count(),
+                    sg=1, hs=0, negative=10, sample=1e-5, seed=42, compute_loss=True, sorted_vocab=True, shrink_windows=True, batch_words=10000
+                )
+            case _:
+                raise ValueError(f"Unsupported model_type '{model_type}'")
+
         print("Building vocabulary....")
         model.build_vocab(sentences)
 
