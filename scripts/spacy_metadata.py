@@ -21,7 +21,7 @@ def extract_metadata(sentences, batch_size: int = 100):
     texts = [ " ".join(sentence) if isinstance(sentence, list) else sentence for sentence in sentences ]
 
     metadata_dict = {}
-    n_process = os.cpu_count()  # Use all available CPUs
+    n_process = os.cpu_count()  # Use all available cores
 
     for doc in tqdm(nlp.pipe(texts, batch_size=batch_size, n_process=n_process),
                     total=len(texts),
